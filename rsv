@@ -1,0 +1,62 @@
+#!/usr/bin/node
+var fs = require('fs');
+var htcondor = require('htcondor');
+
+//file to parse for statuses..
+var index_path = '/var/www/html/rsv/index.html';
+
+mode=process.argv[2];
+switch(mode) {
+    case "config": 
+        config(); 
+        break;
+    default: print();
+}
+
+function config() {
+    console.log("graph_title RSV status metrics");
+    console.log("graph_vlabel hosts");
+    console.log("hosts.label number of hosts monitored");
+    console.log("ok.label number of hosts with ok status");
+    console.log("warning.label number of hosts with warning status");
+    console.log("critical.label number of hosts with critical status");
+    console.log("unknown.label number of hosts with unknown status");
+    console.log("other.label number of hosts with other status");
+}
+
+function print() {
+    //find number of jobs running (should be close to number of Host)
+    //htcondor.cron_q({constraint: "OSGRSVHost==\"uct2-net1.mwt2.org\""}).then(function(jobs) {
+    htcondor.cron_q().then(function(jobs) {
+        console.log("hosts.value "+jobs.length);
+
+        //parse the index.html
+        fs.readFile(index_path, {encoding: 'utf8'}, function(err, data) {
+            var counts = {ok: 0, warning: 0, critical: 0, unknown: 0, other: 0};
+            data.split("\n").forEach(function(line) {
+                line = line.trim();
+                if(line.indexOf("<tr id='") === 0) {
+                    //console.log(line);
+                    var end = line.indexOf('\'', 8);
+                    var status = line.substr(8, end-8);
+                    switch(status) {
+                    case "ok": counts.ok++; break;
+                    case "critical": counts.critical++; break;
+                    case "unknown": counts.unknown++; break;
+                    case "warning": counts.warning++; break;
+                    default: counts.other++; break;
+                    }
+                }
+            });
+            //console.dir(counts);
+            console.log("ok.label "+counts.ok);
+            console.log("warning.label "+counts.warning);
+            console.log("critial.label "+counts.critical);
+            console.log("unknown.label "+counts.unknown);
+            console.log("other.label "+counts.other);
+        });
+    }).fail(function(err) {
+        console.dir(err);
+    });
+}
+
