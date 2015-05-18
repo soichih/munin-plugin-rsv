@@ -51,7 +51,7 @@ function print() {
             //console.dir(counts);
             console.log("ok.value "+counts.ok);
             console.log("warning.value "+counts.warning);
-            console.log("critial.value "+counts.critical);
+            console.log("critical.value "+counts.critical);
             console.log("unknown.value "+counts.unknown);
             console.log("other.value "+counts.other);
         });
