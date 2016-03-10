@@ -3,7 +3,7 @@ var fs = require('fs');
 var htcondor = require('htcondor');
 
 //file to parse for statuses..
-var index_path = '/var/www/html/rsv/index.html';
+var index_path = '/usr/share/rsv/www/index.html';
 
 mode=process.argv[2];
 switch(mode) {
